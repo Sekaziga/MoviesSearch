@@ -110,7 +110,7 @@ function displayMovies(movies) {
       <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" />
       <h3>${movie.title}</h3>
       <p>Release Date: ${movie.release_date}</p>
-
+      <button onclick='addToFavorites(${JSON.stringify(movie).replace(/'/g, "&apos;")})'>Add to Favorites</button>
     `;
     movieElement.addEventListener("click", () => showDetails(movie));
     moviesContainer.appendChild(movieElement);
@@ -146,5 +146,28 @@ loadMoreButton.addEventListener("click", () => {
 // Fetch initial data on page load
 fetchGenres();
 fetchMovies(currentPage);
-
+// Add a movie to favorites
+function addToFavorites(movie) {
+    let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+    if (!favorites.some(fav => fav.id === movie.id)) {
+      favorites.push(movie);
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+      alert(`${movie.title} added to favorites!`);
+    } else {
+      alert(`${movie.title} is already in your favorites.`);
+    }
+  }
+  
+  // Remove a movie from favorites
+  function removeFromFavorites(movieId) {
+    let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+    favorites = favorites.filter(movie => movie.id !== movieId);
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+    alert("Movie removed from favorites.");
+  }
+  
+  // Fetch all favorite movies
+  function getFavorites() {
+    return JSON.parse(localStorage.getItem("favorites")) || [];
+  }
   
