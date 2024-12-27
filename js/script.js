@@ -136,7 +136,12 @@ searchButton.addEventListener("click", () => {
   }
 });
 
-
+loadMoreButton.addEventListener("click", () => {
+  if (currentPage < totalPages) {
+    currentPage++;
+    fetchMovies(currentPage, currentQuery, selectedGenre);
+  }
+});
 
 // Fetch initial data on page load
 fetchGenres();
