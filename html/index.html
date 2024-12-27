@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FilmSamlaren - Find Your Movies</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+          <h1>FilmSamlaren</h1>
+          <div class="search-bar">
+            <input 
+              type="text" 
+              id="searchInput" 
+              placeholder="Search for movies..." 
+              aria-label="Search for movies"
+            >
+            <button id="searchButton" aria-label="Search movies">Search</button>
+          </div>
+          <div id="movieDetails" class="details hidden">
+            <button id="closeDetails" aria-label="Close details">Close</button>
+            <div id="detailsContent"></div>
+          </div>
+          <div class="filter-container">
+            <label for="genre-filter">Filter by Genre:</label>
+            <select id="genre-filter">
+              <option value="">All Genres</option>
+              
+            </select>
+            <a href="favorites.html" id="viewFavoritesButton">View Favorites</a>
+
+          </div>
+        </div>
+        
+          
+      </header>
+      
+  <main class="container">
+    <section class="movie-grid" id="movies">
+      <h2>Popular Movies</h2>
+      <div class="loader" id="loader" role="alert" aria-live="polite">Loading...</div>
+    </section>
+    
+  </main>
+
+
+
+  
+</body>
+<footer>
+    <div class="container">
+      <p>&copy; 2024 FilmSamlaren. All rights reserved.</p>
+      
+      <p>
+        Contact: <a href="sekaziga@gmail.com">sekaziga@gmail.com</a>
+      </p>
+    </div>
+  </footer>
+</html>
