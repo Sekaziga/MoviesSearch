@@ -11,19 +11,36 @@ let allMovies = [];
 let currentPage = 1;
 let currentQuery = "";
 let totalPages = 1;
-let genres = []; // Array to store available genres
-let selectedGenre = ""; // Currently selected genre ID
+let genres = [];
+let selectedGenre = "";
 
-// Fetch genres from TMDB API
-async function fetchGenres() {
+// Fetch initial data using Promise.all()
+async function fetchInitialData() {
   try {
-    const response = await fetch(`${apiBaseUrl}/genre/movie/list?api_key=${apiKey}&language=en-US`);
-    if (!response.ok) throw new Error("Failed to fetch genres");
-    const data = await response.json();
-    genres = data.genres;
+    loader.style.display = "block";
+
+    const [genresResponse, moviesResponse] = await Promise.all([
+      fetch(`${apiBaseUrl}/genre/movie/list?api_key=${apiKey}&language=en-US`),
+      fetch(`${apiBaseUrl}/movie/popular?api_key=${apiKey}&language=en-US&page=${currentPage}`)
+    ]);
+
+    if (!genresResponse.ok || !moviesResponse.ok) {
+      throw new Error("Failed to fetch initial data");
+    }
+
+    const genresData = await genresResponse.json();
+    genres = genresData.genres;
     populateGenreDropdown(genres);
+
+    const moviesData = await moviesResponse.json();
+    totalPages = moviesData.total_pages;
+    allMovies = moviesData.results;
+    displayMovies(allMovies);
   } catch (error) {
-    console.error("Error fetching genres:", error);
+    console.error("Error fetching initial data:", error);
+    loader.textContent = "Failed to fetch data. Please try again later.";
+  } finally {
+    loader.style.display = "none";
   }
 }
 
@@ -57,6 +74,7 @@ async function fetchMovies(page = 1, query = "", genreId = "") {
     if (page === 1) allMovies = [];
     allMovies = [...allMovies, ...data.results];
     displayMovies(allMovies);
+
     loader.style.display = "none";
 
     if (page >= totalPages) {
@@ -77,11 +95,11 @@ function displayMovies(movies) {
     moviesContainer.innerHTML = "<p>No movies found. Try a different search term.</p>";
     return;
   }
+
   function showDetails(movie) {
-    console.log("showDetails called for movie:", movie);
     const detailsContainer = document.getElementById("movieDetails");
     const detailsContent = document.getElementById("detailsContent");
-  
+
     detailsContent.innerHTML = `
       <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" />
       <h2>${movie.title}</h2>
@@ -89,19 +107,17 @@ function displayMovies(movies) {
       <p><strong>Overview:</strong> ${movie.overview}</p>
       <p><strong>Rating:</strong> ${movie.vote_average}/10</p>
     `;
-  
+
     detailsContainer.classList.remove("details");
     detailsContainer.classList.remove("hidden");
   }
 
-  // Close the details view
   const closeDetailsButton = document.getElementById("closeDetails");
   closeDetailsButton.addEventListener("click", () => {
     const detailsContainer = document.getElementById("movieDetails");
     detailsContainer.classList.add("hidden");
     detailsContainer.classList.add("details");
   });
-  
 
   movies.forEach((movie) => {
     const movieElement = document.createElement("div");
@@ -143,31 +159,30 @@ loadMoreButton.addEventListener("click", () => {
   }
 });
 
-// Fetch initial data on page load
-fetchGenres();
-fetchMovies(currentPage);
 // Add a movie to favorites
 function addToFavorites(movie) {
-    let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-    if (!favorites.some(fav => fav.id === movie.id)) {
-      favorites.push(movie);
-      localStorage.setItem("favorites", JSON.stringify(favorites));
-      alert(`${movie.title} added to favorites!`);
-    } else {
-      alert(`${movie.title} is already in your favorites.`);
-    }
-  }
-  
-  // Remove a movie from favorites
-  function removeFromFavorites(movieId) {
-    let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-    favorites = favorites.filter(movie => movie.id !== movieId);
+  let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+  if (!favorites.some((fav) => fav.id === movie.id)) {
+    favorites.push(movie);
     localStorage.setItem("favorites", JSON.stringify(favorites));
-    alert("Movie removed from favorites.");
+    alert(`${movie.title} added to favorites!`);
+  } else {
+    alert(`${movie.title} is already in your favorites.`);
   }
-  
-  // Fetch all favorite movies
-  function getFavorites() {
-    return JSON.parse(localStorage.getItem("favorites")) || [];
-  }
-  
+}
+
+// Remove a movie from favorites
+function removeFromFavorites(movieId) {
+  let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+  favorites = favorites.filter((movie) => movie.id !== movieId);
+  localStorage.setItem("favorites", JSON.stringify(favorites));
+  alert("Movie removed from favorites.");
+}
+
+// Fetch all favorite movies
+function getFavorites() {
+  return JSON.parse(localStorage.getItem("favorites")) || [];
+}
+
+// Fetch initial data on page load
+fetchInitialData();
